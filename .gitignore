@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+.venv/
+venv/
+env/
+
+# API keys — never commit these
+.env.local
+*.env
+
+# Virtual environments
+.venv/
+
+# RAG / vector store data (can be large)
+rag/chroma_db/
+rag/vectorstore/
+*.faiss
+*.pkl
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
