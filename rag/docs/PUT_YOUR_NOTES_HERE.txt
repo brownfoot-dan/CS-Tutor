@@ -1,0 +1,12 @@
+# Drop your study notes here and Axiom will be able to answer from them.
+#
+# Supported formats:
+#   .txt  — plain text notes
+#   .md   — markdown notes
+#   .pdf  — lecture slides, textbooks, papers
+#
+# After adding files, run:
+#   py rag/ingest.py
+#
+# Then chat with your notes:
+#   py rag/rag_chat.py
