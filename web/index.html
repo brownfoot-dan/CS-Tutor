@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Axiom - CS Tutor</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <!-- KaTeX: renders math symbols like O(n log n), fractions, etc. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="window._katexReady=true"></script>
+
+  <style>
+    :root {
+      --bg:       #0b0b10;
+      --surface:  #12121a;
+      --surface2: #1a1a26;
+      --border:   rgba(255,255,255,0.07);
+      --border2:  rgba(255,255,255,0.13);
+      --accent:   #7b68ee;
+      --teal:     #3dd9c4;
+      --text:     #e4e4f0;
+      --muted:    #6b6b88;
+      --user-bg:  #1b1735;
+      --r: 12px;  --r-sm: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 22px; border-bottom: 1px solid var(--border);
+      background: var(--surface); flex-shrink: 0;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo-mark {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--accent), var(--teal));
+      border-radius: 9px; display: grid; place-items: center;
+      font-weight: 700; font-size: 16px; color: #fff;
+    }
+    .logo-name { font-size: 15px; font-weight: 600; letter-spacing: -.3px; }
+    .logo-sub  { font-size: 11px; color: var(--muted); }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .badge {
+      font-size: 11px; padding: 3px 9px; border-radius: 20px;
+      border: 1px solid rgba(123,104,238,.3);
+      color: var(--accent); background: rgba(123,104,238,.08); font-weight: 500;
+    }
+    .icon-btn {
+      width: 32px; height: 32px; border-radius: var(--r-sm);
+      border: 1px solid var(--border2); background: var(--surface2);
+      color: var(--muted); cursor: pointer; display: grid; place-items: center;
+      transition: color .15s, background .15s;
+    }
+    .icon-btn:hover { color: var(--text); background: #22222e; }
+
+    /* ── Chat ───────────────────────────────────────────── */
+    #chat {
+      flex: 1; overflow-y: auto; scroll-behavior: smooth;
+      padding: 28px 0 8px;
+      scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.08) transparent;
+    }
+    #chat::-webkit-scrollbar { width: 4px; }
+    #chat::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 4px; }
+    .inner { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+
+    /* ── Welcome ────────────────────────────────────────── */
+    #welcome { text-align: center; padding-top: 40px; }
+    .welcome-icon {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, var(--accent), var(--teal));
+      border-radius: 18px; display: grid; place-items: center;
+      font-size: 30px; margin: 0 auto 18px;
+      box-shadow: 0 0 40px rgba(123,104,238,.2);
+    }
+    .welcome-title { font-size: 26px; font-weight: 600; letter-spacing: -.5px; margin-bottom: 10px; }
+    .welcome-sub   { color: var(--muted); font-size: 14px; line-height: 1.65; margin-bottom: 28px; }
+    .starters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-width: 540px; margin: 0 auto; }
+    .starter {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: var(--r); padding: 13px 15px; text-align: left;
+      cursor: pointer; color: var(--text); font-size: 13px; line-height: 1.5;
+      font-family: inherit; transition: border-color .15s, transform .15s, background .15s;
+    }
+    .starter:hover { background: var(--surface2); border-color: rgba(123,104,238,.4); transform: translateY(-1px); }
+    .starter-tag { font-size: 10px; color: var(--teal); font-weight: 600; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 5px; }
+
+    /* ── Messages ───────────────────────────────────────── */
+    #messages { display: none; flex-direction: column; gap: 20px; }
+    .msg { display: flex; flex-direction: column; gap: 6px; animation: fadeUp .2s ease both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .msg.user { align-items: flex-end; }
+    .msg-label {
+      font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .5px; color: var(--muted); padding: 0 3px;
+    }
+    .msg.assistant .msg-label { color: var(--accent); }
+    .bubble {
+      padding: 13px 17px; border-radius: var(--r);
+      font-size: 14.5px; line-height: 1.65; max-width: 84%;
+    }
+    .msg.user .bubble {
+      background: var(--user-bg); border: 1px solid rgba(123,104,238,.15);
+      border-bottom-right-radius: 3px; white-space: pre-wrap;
+    }
+    .msg.assistant .bubble {
+      background: var(--surface); border: 1px solid var(--border);
+      border-bottom-left-radius: 3px; max-width: 100%; width: 100%;
+    }
+
+    /* ── Markdown ───────────────────────────────────────── */
+    .md h1, .md h2, .md h3 { font-weight: 600; letter-spacing: -.3px; margin: 20px 0 8px; color: var(--text); line-height: 1.3; }
+    .md h1 { font-size: 1.25em; } .md h2 { font-size: 1.1em; } .md h3 { font-size: 1em; }
+    .md h1:first-child, .md h2:first-child, .md h3:first-child { margin-top: 0; }
+    .md p { margin-bottom: 11px; } .md p:last-child { margin-bottom: 0; }
+    .md strong { color: #c4bfff; font-weight: 600; }
+    .md em { color: var(--teal); }
+    .md ul, .md ol { padding-left: 20px; margin: 8px 0; }
+    .md li { margin-bottom: 4px; } .md li::marker { color: var(--accent); }
+    .md a { color: var(--teal); text-decoration: none; } .md a:hover { text-decoration: underline; }
+    .md hr { border: none; border-top: 1px solid var(--border2); margin: 16px 0; }
+    .md table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13.5px; }
+    .md th { background: var(--surface2); padding: 9px 13px; font-weight: 600; border: 1px solid var(--border2); text-align: left; }
+    .md td { padding: 8px 13px; border: 1px solid var(--border); }
+    .md tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+    .md code:not(pre code) {
+      font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+      background: var(--surface2); border: 1px solid var(--border2);
+      padding: 1px 6px; border-radius: 4px; color: var(--teal);
+    }
+
+    /* ── Code blocks ────────────────────────────────────── */
+    .code-wrap { border: 1px solid var(--border2); border-radius: var(--r-sm); overflow: hidden; margin: 12px 0; }
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 13px; background: #0c0c17; border-bottom: 1px solid var(--border);
+    }
+    .code-lang { font-size: 10.5px; color: var(--teal); font-family: 'JetBrains Mono', monospace; font-weight: 500; text-transform: uppercase; letter-spacing: .5px; }
+    .copy-btn {
+      font-size: 10.5px; padding: 2px 9px; border-radius: 4px;
+      border: 1px solid var(--border2); background: transparent;
+      color: var(--muted); cursor: pointer; font-family: inherit; transition: all .15s;
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+    .copy-btn.ok    { color: var(--teal); border-color: rgba(61,217,196,.4); }
+    .code-wrap pre { margin: 0 !important; border-radius: 0 !important; border: none !important; }
+    .code-wrap pre code.hljs {
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 12.5px !important; padding: 15px !important;
+      display: block; background: #0e0e1a !important;
+    }
+
+    /* ── Thinking / reasoning block ─────────────────────── */
+    .thinking-block { margin-bottom: 12px; border: 1px solid rgba(123,104,238,.2); border-radius: var(--r-sm); overflow: hidden; }
+    summary.thinking-toggle {
+      display: flex; align-items: center; gap: 7px; padding: 8px 12px;
+      background: rgba(123,104,238,.07); cursor: pointer;
+      font-size: 12px; color: var(--accent); font-weight: 500;
+      user-select: none; list-style: none;
+    }
+    summary.thinking-toggle::-webkit-details-marker { display: none; }
+    .t-arrow { font-size: 9px; transition: transform .2s; display: inline-block; }
+    details[open] .t-arrow { transform: rotate(90deg); }
+    .thinking-body {
+      padding: 10px 14px; font-size: 12.5px; color: var(--muted);
+      line-height: 1.6; font-style: italic; white-space: pre-wrap;
+      border-top: 1px solid rgba(123,104,238,.15);
+    }
+
+    /* ── KaTeX overrides ────────────────────────────────── */
+    .katex { font-size: 1em !important; }
+    .katex-display { overflow-x: auto; padding: 4px 0; margin: 10px 0; }
+
+    /* ── Typing indicator ───────────────────────────────── */
+    .typing {
+      display: flex; align-items: center; gap: 5px;
+      padding: 13px 17px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r); border-bottom-left-radius: 3px; width: fit-content;
+    }
+    .typing span { width: 6px; height: 6px; background: var(--muted); border-radius: 50%; animation: bop 1.1s infinite; }
+    .typing span:nth-child(2) { animation-delay: .15s; }
+    .typing span:nth-child(3) { animation-delay: .3s; }
+    @keyframes bop {
+      0%, 60%, 100% { transform: translateY(0);    opacity: .35; }
+      30%            { transform: translateY(-5px); opacity: 1;   }
+    }
+
+    /* ── Error ──────────────────────────────────────────── */
+    .err {
+      background: rgba(255,92,122,.07); border: 1px solid rgba(255,92,122,.25);
+      border-radius: var(--r-sm); padding: 11px 14px;
+      font-size: 13px; color: #ff8fa3; line-height: 1.55;
+    }
+    .err code { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+    /* ── Input area ─────────────────────────────────────── */
+    #input-area { padding: 14px 20px 18px; border-top: 1px solid var(--border); background: var(--bg); flex-shrink: 0; }
+    .input-box {
+      max-width: 760px; margin: 0 auto; display: flex; align-items: flex-end; gap: 10px;
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 14px; padding: 10px 12px; transition: border-color .15s;
+    }
+    .input-box:focus-within { border-color: rgba(123,104,238,.5); }
+    #user-input {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--text); font-family: inherit; font-size: 14.5px;
+      line-height: 1.5; resize: none; max-height: 180px; min-height: 24px;
+    }
+    #user-input::placeholder { color: var(--muted); }
+    #send-btn {
+      width: 34px; height: 34px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--teal));
+      border: none; cursor: pointer; display: grid; place-items: center;
+      flex-shrink: 0; transition: opacity .15s, transform .1s;
+    }
+    #send-btn:hover  { opacity: .85; }
+    #send-btn:active { transform: scale(.93); }
+    #send-btn:disabled { opacity: .25; cursor: not-allowed; transform: none; }
+    .hint { max-width: 760px; margin: 7px auto 0; font-size: 11px; color: var(--muted); text-align: center; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">A</div>
+    <div>
+      <div class="logo-name">Axiom</div>
+      <div class="logo-sub">CS Tutor</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge">gemma4 &middot; cloud</span>
+    <button class="icon-btn" id="clear-btn" title="Clear chat">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<div id="chat">
+  <div id="welcome" class="inner">
+    <div class="welcome-icon">&#9889;</div>
+    <h1 class="welcome-title">Hi, I'm Axiom</h1>
+    <p class="welcome-sub">Sharp CS tutor. Ask me anything about algorithms, data structures, code, complexity, or any computer science topic.</p>
+    <div class="starters">
+      <button class="starter" onclick="useStarter(this)">
+        <div class="starter-tag">Concepts</div>
+        Explain recursion with a concrete example
+      </button>
+      <button class="starter" onclick="useStarter(this)">
+        <div class="starter-tag">Complexity</div>
+        What is Big-O? Walk me through O(n log n)
+      </button>
+      <button class="starter" onclick="useStarter(this)">
+        <div class="starter-tag">Data Structures</div>
+        Hash table vs BST &mdash; when do I use each?
+      </button>
+      <button class="starter" onclick="useStarter(this)">
+        <div class="starter-tag">Code Review</div>
+        Why is searching a Python list O(n)?
+      </button>
+    </div>
+  </div>
+  <div id="messages" class="inner"></div>
+</div>
+
+<div id="input-area">
+  <div class="input-box">
+    <textarea id="user-input" placeholder="Ask Axiom a CS question..." rows="1" autofocus></textarea>
+    <button id="send-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+  <p class="hint">Enter to send &nbsp;&middot;&nbsp; Shift+Enter for new line</p>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+//  Config — empty string = relative URL (uses serve.py proxy)
+// ─────────────────────────────────────────────────────────
+const OLLAMA_BASE = '';
+const MODEL       = 'axiom';
+
+let chatHistory = [];
+let busy        = false;
+
+// ─────────────────────────────────────────────────────────
+//  Math rendering (KaTeX)
+// ─────────────────────────────────────────────────────────
+function renderMath(el) {
+  if (typeof renderMathInElement === 'undefined') return;
+  renderMathInElement(el, {
+    delimiters: [
+      { left: '$$',  right: '$$',  display: true  },
+      { left: '$',   right: '$',   display: false  },
+      { left: '\\[', right: '\\]', display: true  },
+      { left: '\\(', right: '\\)', display: false  },
+    ],
+    throwOnError: false,
+  });
+}
+
+// ─────────────────────────────────────────────────────────
+//  Marked: custom code-block renderer
+//  NOTE: marked v9+ passes a token object {text, lang}
+//        older versions pass (code, lang) as strings.
+//        We handle both.
+// ─────────────────────────────────────────────────────────
+const mdRenderer = new marked.Renderer();
+mdRenderer.code = function(codeOrToken, langArg) {
+  // Normalise across marked versions
+  let rawCode, language;
+  if (codeOrToken && typeof codeOrToken === 'object') {
+    rawCode  = codeOrToken.text || codeOrToken.raw || '';
+    language = (codeOrToken.lang || '').trim() || 'text';
+  } else {
+    rawCode  = String(codeOrToken || '');
+    language = (langArg || '').trim() || 'text';
+  }
+
+  let hi;
+  try {
+    hi = hljs.getLanguage(language)
+      ? hljs.highlight(rawCode, { language, ignoreIllegals: true }).value
+      : hljs.highlightAuto(rawCode).value;
+  } catch { hi = esc(rawCode); }
+
+  const id = 'c' + Math.random().toString(36).slice(2, 9);
+  return `<div class="code-wrap">
+    <div class="code-header">
+      <span class="code-lang">${language}</span>
+      <button class="copy-btn" onclick="doCopy('${id}',this)">Copy</button>
+    </div>
+    <pre><code id="${id}" class="hljs">${hi}</code></pre>
+  </div>`;
+};
+marked.use({ renderer: mdRenderer, breaks: true, gfm: true });
+
+// ─────────────────────────────────────────────────────────
+//  Throttled render: uses rAF so markdown always parses
+//  complete blocks — no broken symbols mid-stream
+// ─────────────────────────────────────────────────────────
+let rafId = null;
+function renderInto(el, text) {
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(() => {
+    el.innerHTML = marked.parse(text);
+    renderMath(el);
+    scrollBottom();
+  });
+}
+
+// ─────────────────────────────────────────────────────────
+//  Utilities
+// ─────────────────────────────────────────────────────────
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function doCopy(id, btn) {
+  navigator.clipboard.writeText(
+    document.getElementById(id).innerText.trimEnd()
+  ).then(() => {
+    btn.textContent = 'Copied!'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+
+function setLoading(v) { busy = v; document.getElementById('send-btn').disabled = v; }
+function scrollBottom() { const c = document.getElementById('chat'); c.scrollTop = c.scrollHeight; }
+
+// ─────────────────────────────────────────────────────────
+//  DOM helpers
+// ─────────────────────────────────────────────────────────
+function showMessages() {
+  document.getElementById('welcome').style.display  = 'none';
+  const m = document.getElementById('messages');
+  m.style.display        = 'flex';
+  m.style.flexDirection  = 'column';
+  m.style.gap            = '20px';
+}
+
+function addUserMsg(text) {
+  showMessages();
+  const d = document.createElement('div');
+  d.className = 'msg user';
+  d.innerHTML = `<div class="msg-label">You</div><div class="bubble">${esc(text)}</div>`;
+  document.getElementById('messages').appendChild(d);
+  scrollBottom();
+}
+
+function addTypingDots() {
+  showMessages();
+  const d = document.createElement('div');
+  d.className = 'msg assistant'; d.id = 'typing-indicator';
+  d.innerHTML = `<div class="msg-label">Axiom</div>
+    <div class="typing"><span></span><span></span><span></span></div>`;
+  document.getElementById('messages').appendChild(d);
+  scrollBottom();
+}
+
+function removeTyping() { document.getElementById('typing-indicator')?.remove(); }
+
+function createAssistantBubble(withThinking) {
+  removeTyping();
+  showMessages();
+  const div    = document.createElement('div');  div.className = 'msg assistant';
+  const label  = document.createElement('div');  label.className = 'msg-label'; label.textContent = 'Axiom';
+  const bubble = document.createElement('div');  bubble.className = 'bubble';
+
+  let thinkEl = null;
+  if (withThinking) {
+    const details = document.createElement('details'); details.className = 'thinking-block';
+    const summary = document.createElement('summary'); summary.className = 'thinking-toggle';
+    summary.innerHTML = '<span class="t-arrow">&#9654;</span>&nbsp;Reasoning';
+    const body    = document.createElement('div');    body.className = 'thinking-body';
+    details.appendChild(summary);
+    details.appendChild(body);
+    bubble.appendChild(details);
+    thinkEl = body;
+  }
+
+  const mdEl = document.createElement('div'); mdEl.className = 'md';
+  bubble.appendChild(mdEl);
+  div.appendChild(label);
+  div.appendChild(bubble);
+  document.getElementById('messages').appendChild(div);
+  scrollBottom();
+  return { mdEl, thinkEl };
+}
+
+function addErrorMsg(html) {
+  removeTyping(); showMessages();
+  const d = document.createElement('div'); d.className = 'msg assistant';
+  d.innerHTML = `<div class="msg-label">Axiom</div>
+    <div class="bubble"><div class="err">${html}</div></div>`;
+  document.getElementById('messages').appendChild(d);
+  scrollBottom();
+}
+
+// ─────────────────────────────────────────────────────────
+//  Send a message
+// ─────────────────────────────────────────────────────────
+async function sendMessage() {
+  if (busy) return;
+  const input = document.getElementById('user-input');
+  const text  = input.value.trim();
+  if (!text) return;
+
+  input.value = ''; input.style.height = 'auto';
+  setLoading(true);
+  addUserMsg(text);
+  addTypingDots();
+  chatHistory.push({ role: 'user', content: text });
+
+  try {
+    const res = await fetch(`${OLLAMA_BASE}/api/chat`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        model:    MODEL,
+        messages: chatHistory,
+        stream:   true,
+        think:    true,   // enables chain-of-thought reasoning
+      }),
+    });
+
+    if (!res.ok) throw new Error(`Server responded ${res.status} — is Ollama running?`);
+
+    const reader  = res.body.getReader();
+    const decoder = new TextDecoder();
+
+    let fullContent  = '';
+    let fullThinking = '';
+    let els          = null;   // { mdEl, thinkEl }
+    let seenThink    = false;
+    let leftover     = '';
+
+    const handleJSON = (line) => {
+      line = line.trim();
+      if (!line) return;
+      try {
+        const j = JSON.parse(line);
+
+        // Reasoning tokens
+        if (j.message?.thinking) {
+          if (!seenThink) seenThink = true;
+          fullThinking += j.message.thinking;
+          if (els?.thinkEl) { els.thinkEl.textContent = fullThinking; scrollBottom(); }
+        }
+
+        // Answer tokens
+        if (j.message?.content) {
+          if (!els) els = createAssistantBubble(seenThink);
+          fullContent += j.message.content;
+          renderInto(els.mdEl, fullContent);
+        }
+      } catch { /* partial JSON — skip */ }
+    };
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = leftover + decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+      leftover = lines.pop() ?? '';
+      lines.forEach(handleJSON);
+    }
+    if (leftover) handleJSON(leftover);
+
+    // Final clean render with full math pass
+    if (els?.mdEl) {
+      els.mdEl.innerHTML = marked.parse(fullContent);
+      renderMath(els.mdEl);
+    } else {
+      addErrorMsg('Axiom returned an empty response — please try again.');
+    }
+
+    chatHistory.push({ role: 'assistant', content: fullContent });
+
+  } catch (err) {
+    chatHistory.pop();
+    const isNetwork = err instanceof TypeError && err.message.includes('fetch');
+    addErrorMsg(
+      isNetwork
+        ? `<strong>Cannot reach Ollama.</strong><br>${esc(err.message)}<br><br>
+           Make sure Ollama is running — double-click <strong>start-axiom.bat</strong> in your cs-tutor folder.`
+        : `<strong>Something went wrong.</strong><br><code>${esc(err.message)}</code>`
+    );
+  }
+
+  setLoading(false);
+  document.getElementById('user-input').focus();
+}
+
+// ─────────────────────────────────────────────────────────
+//  Events
+// ─────────────────────────────────────────────────────────
+document.getElementById('send-btn').addEventListener('click', sendMessage);
+
+document.getElementById('user-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+document.getElementById('user-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 180) + 'px';
+});
+
+document.getElementById('clear-btn').addEventListener('click', () => {
+  chatHistory = [];
+  document.getElementById('messages').innerHTML = '';
+  document.getElementById('messages').style.display = 'none';
+  document.getElementById('welcome').style.display = 'block';
+});
+
+function useStarter(btn) {
+  const tag  = btn.querySelector('.starter-tag');
+  const text = btn.textContent.replace(tag.textContent, '').trim();
+  document.getElementById('user-input').value = text;
+  sendMessage();
+}
+</script>
+</body>
+</html>
